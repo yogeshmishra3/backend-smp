@@ -1,5 +1,5 @@
 const express = require('express');
-const Stream = require('../models/Stream');
+const Stream = require('../models/stream');
 const router = express.Router();
 
 // Create Stream
