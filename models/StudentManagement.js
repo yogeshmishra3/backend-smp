@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Department = require('./Department');
-const Stream = require('./Stream');
 const StudentCounter = require('./StudentCounter');
 
 const studentSchema = new mongoose.Schema({
