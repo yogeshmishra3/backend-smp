@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const Department = require('./Department');
+const Stream = require('./Stream');
+const StudentCounter = require('./StudentCounter');
 
 const studentSchema = new mongoose.Schema({
   // Basic Info
@@ -33,25 +36,20 @@ const studentSchema = new mongoose.Schema({
   },
   section: String,
 
-  // 🔁 Updated Admission Fields
   admissionType: {
     type: String,
     enum: ['Regular', 'Direct Second Year', 'Lateral Entry'],
     required: true
   },
-  admissionThrough: {
-    type: String
-  },
+  admissionThrough: String,
   remark: String,
 
-  // Current Semester (Live Progress)
   semester: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Semester',
     required: true
   },
 
-  // Academic Record - Past and Present
   semesterRecords: [
     {
       semester: {
@@ -80,8 +78,6 @@ const studentSchema = new mongoose.Schema({
       }
     }
   ],
-
-  // Backlog Subjects
   backlogs: [
     {
       subject: {
@@ -100,7 +96,6 @@ const studentSchema = new mongoose.Schema({
     }
   ],
 
-  // Admission/Course Details
   stream: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Stream',
@@ -120,7 +115,46 @@ const studentSchema = new mongoose.Schema({
   admissionDate: {
     type: Date,
     default: Date.now
+  },
+
+  studentId: {
+    type: String,
+    unique: true
   }
+
 }, { timestamps: true });
+
+// Pre-save hook to generate studentId
+studentSchema.pre('save', async function (next) {
+  if (this.isNew && !this.studentId) {
+    try {
+      const department = await Department.findById(this.department);
+      const stream = await Stream.findById(this.stream);
+
+      if (!department || !stream) {
+        throw new Error('Invalid department or stream reference');
+      }
+
+      const deptName = department.name.replace(/\s+/g, '').toUpperCase(); // e.g., "CSE"
+      const streamName = stream.name.replace(/\s+/g, '').toUpperCase();   // e.g., "IT"
+      const key = `${deptName}-${streamName}`;
+
+      const counter = await StudentCounter.findOneAndUpdate(
+        { key },
+        { $inc: { count: 1 } },
+        { upsert: true, new: true }
+      );
+
+      const paddedCount = String(counter.count).padStart(3, '0');
+      this.studentId = `${deptName}${streamName}${paddedCount}`;
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    next();
+  }
+});
 
 module.exports = mongoose.model('Student', studentSchema);
