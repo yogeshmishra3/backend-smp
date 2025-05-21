@@ -12,7 +12,9 @@ const streamSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-const Stream = mongoose.model('Stream', streamSchema);
+const Stream = mongoose.models.Stream || mongoose.model('Stream', streamSchema);
+
+module.exports = Stream;
 
 
 
