@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Student = require('../models/StudentManagement');
+const stream = require('../models/Stream');
 const Semester = require('../models/Semester');
 const Subject = require('../models/Subject');
 
@@ -76,7 +77,7 @@ router.get('/', async (req, res) => {
   try {
     const { admissionType } = req.query;
     const query = {};
-    
+
     // Filter by admissionType if provided
     if (admissionType) {
       if (!['Regular', 'Direct Second Year', 'Lateral Entry'].includes(admissionType)) {
@@ -113,8 +114,8 @@ router.get('/', async (req, res) => {
     const cleanedStudents = students.map(student => ({
       ...student._doc,
       semesterRecords: student.semesterRecords.filter(
-        record => record.semester && record.semester._id && 
-                  record.subjects.every(sub => sub.subject && sub.subject._id)
+        record => record.semester && record.semester._id &&
+          record.subjects.every(sub => sub.subject && sub.subject._id)
       ),
       backlogs: student.backlogs.filter(
         backlog => backlog.subject && backlog.subject._id && backlog.semester && backlog.semester._id
@@ -160,8 +161,8 @@ router.get('/:id', async (req, res) => {
     const cleanedStudent = {
       ...student._doc,
       semesterRecords: student.semesterRecords.filter(
-        record => record.semester && record.semester._id && 
-                  record.subjects.every(sub => sub.subject && sub.subject._id)
+        record => record.semester && record.semester._id &&
+          record.subjects.every(sub => sub.subject && sub.subject._id)
       ),
       backlogs: student.backlogs.filter(
         backlog => backlog.subject && backlog.subject._id && backlog.semester && backlog.semester._id
@@ -382,7 +383,7 @@ router.post('/:id/add-backlog', async (req, res) => {
     subjectIds.forEach(subjectId => {
       const existingBacklog = student.backlogs.find(
         backlog => backlog.subject && backlog.semester &&
-                   String(backlog.subject) === String(subjectId) && String(backlog.semester) === String(semesterId)
+          String(backlog.subject) === String(subjectId) && String(backlog.semester) === String(semesterId)
       );
       if (!existingBacklog) {
         student.backlogs.push({
