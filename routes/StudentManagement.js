@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Student = require('../models/StudentManagement');
-const stream = require('../models/Stream');
+const stream = require('../models/stream');
 const Semester = require('../models/Semester');
 const Subject = require('../models/Subject');
 
