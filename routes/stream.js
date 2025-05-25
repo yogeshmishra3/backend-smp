@@ -1,9 +1,9 @@
-const express = require('express');
-const Stream = require('../models/stream');
+const express = require("express");
+const Stream = require("../models/Stream");
 const router = express.Router();
 
 // Create Stream
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { name, description } = req.body;
     const newStream = new Stream({ name, description });
@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 });
 
 // Get all Streams
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const streams = await Stream.find();
     res.status(200).json(streams);
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update Stream
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { name, description } = req.body;
     const stream = await Stream.findByIdAndUpdate(
@@ -40,10 +40,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete Stream
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     await Stream.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: 'Stream deleted successfully' });
+    res.status(200).json({ message: "Stream deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

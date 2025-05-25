@@ -1,3 +1,15 @@
+// const mongoose = require('mongoose');
+
+// const SemesterSchema = new mongoose.Schema({
+//   number: {
+//     type: Number,
+//     required: true,
+//     min: 1,
+//     max: 9
+//   }
+// });
+
+// module.exports = mongoose.model('Semester', SemesterSchema);
 
 
 const mongoose = require('mongoose');

@@ -1,23 +1,27 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Event = require('../models/Event');
+const Event = require("../models/Event");
 
 // Create event
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     // Destructure the necessary fields from the request body
-    const { title, date, type } = req.body;
+    const { title, date, startTime, endTime, type } = req.body;
 
     // Check if required fields are present
     if (!title || !date || !type) {
-      return res.status(400).json({ error: 'Event title, date, and type are required.' });
+      return res
+        .status(400)
+        .json({ error: "Event title, date, and type are required." });
     }
 
     // Create a new event with the provided data
     const event = new Event({
-      title, // Use 'title' field as per the updated schema
+      title,
       date,
-      type
+      startTime: startTime || null, // Store as null if not provided
+      endTime: endTime || null, // Store as null if not provided
+      type,
     });
 
     // Save the event to the database
@@ -32,7 +36,7 @@ router.post('/', async (req, res) => {
 });
 
 // Get all events
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const events = await Event.find().sort({ date: 1 });
     res.json(events);
@@ -43,24 +47,32 @@ router.get('/', async (req, res) => {
 });
 
 // Update event
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const { title, date, type } = req.body;
+    const { title, date, startTime, endTime, type } = req.body;
 
     // Validate the updated event data
     if (!title || !date || !type) {
-      return res.status(400).json({ error: 'Event title, date, and type are required.' });
+      return res
+        .status(400)
+        .json({ error: "Event title, date, and type are required." });
     }
 
     // Find and update the event in the database
     const updatedEvent = await Event.findByIdAndUpdate(
       req.params.id,
-      { title, date, type },
+      {
+        title,
+        date,
+        startTime: startTime || null,
+        endTime: endTime || null,
+        type,
+      },
       { new: true }
     );
 
     if (!updatedEvent) {
-      return res.status(404).json({ error: 'Event not found' });
+      return res.status(404).json({ error: "Event not found" });
     }
 
     // Return the updated event
@@ -72,13 +84,13 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete event
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const event = await Event.findByIdAndDelete(req.params.id);
     if (!event) {
-      return res.status(404).json({ error: 'Event not found' });
+      return res.status(404).json({ error: "Event not found" });
     }
-    res.json({ message: 'Event deleted' });
+    res.json({ message: "Event deleted" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });

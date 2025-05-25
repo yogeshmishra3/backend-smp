@@ -1,12 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Faculty = require('../models/Faculty');
+const Faculty = require("../models/Faculty");
 
 // Create faculty
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { name, role, employmentStatus, username, password } = req.body;
-    const faculty = new Faculty({ name, role, employmentStatus, username, password });
+    const { name, role, employmentStatus, username, password, department } =
+      req.body;
+    const faculty = new Faculty({
+      name,
+      role,
+      employmentStatus,
+      username,
+      password,
+      department,
+    });
     await faculty.save();
     res.status(201).json(faculty);
   } catch (err) {
@@ -14,10 +22,23 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all faculty
-router.get('/', async (req, res) => {
+// Get all faculty with optional role filter
+router.get("/", async (req, res) => {
   try {
-    const faculty = await Faculty.find();
+    const { role } = req.query;
+    let query = {};
+
+    if (role && role !== "All") {
+      if (role === "Non-Teaching") {
+        query.role = {
+          $nin: ["Teaching", "HOD"],
+        };
+      } else {
+        query.role = role;
+      }
+    }
+
+    const faculty = await Faculty.find(query);
     res.json(faculty);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -25,7 +46,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update employment status
-router.put('/:id/status', async (req, res) => {
+router.put("/:id/status", async (req, res) => {
   try {
     const { employmentStatus } = req.body;
     const faculty = await Faculty.findByIdAndUpdate(
@@ -33,6 +54,9 @@ router.put('/:id/status', async (req, res) => {
       { employmentStatus },
       { new: true }
     );
+    if (!faculty) {
+      return res.status(404).json({ error: "Faculty not found" });
+    }
     res.json(faculty);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -40,13 +64,13 @@ router.put('/:id/status', async (req, res) => {
 });
 
 // Delete faculty
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const faculty = await Faculty.findByIdAndDelete(req.params.id);
     if (!faculty) {
-      return res.status(404).json({ error: 'Faculty not found' });
+      return res.status(404).json({ error: "Faculty not found" });
     }
-    res.json({ message: 'Faculty deleted successfully.' });
+    res.json({ message: "Faculty deleted successfully." });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
